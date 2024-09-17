@@ -1,0 +1,44 @@
+version: '3.8'
+services:
+  # Service MySQL
+  db:
+    image: mysql:8.0
+    container_name: mysql_db
+    volumes:
+      - db_data:/var/lib/mysql  # Volume pour la persistance des données
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword  # Mot de passe root de MySQL
+      MYSQL_DATABASE: wordpress_db       # Nom de la base de données
+      MYSQL_USER: wpuser                 # Utilisateur MySQL
+      MYSQL_PASSWORD: wppassword         # Mot de passe de l'utilisateur MySQL
+    networks:
+      - wp-network
+
+  # Service WordPress
+  wordpress:
+    image: wordpress:latest
+    container_name: wordpress
+    ports:
+      - "8088:80"  # Expose le port 80 de WordPress sur le port 8080
+    volumes:
+      - wp_data:/var/www/html  # Volume pour la persistance des données WordPress
+    restart: always
+    environment:
+      WORDPRESS_DB_HOST: db:3306           # Adresse de la base de données MySQL
+      WORDPRESS_DB_NAME: wordpress_db      # Nom de la base de données
+      WORDPRESS_DB_USER: wpuser            # Utilisateur MySQL
+      WORDPRESS_DB_PASSWORD: wppassword    # Mot de passe de l'utilisateur MySQL
+    networks:
+      - wp-network
+
+# Volumes pour la persistance des données
+volumes:
+  db_data:  # Volume pour MySQL
+  wp_data:  # Volume pour WordPress
+
+# Réseau partagé entre les services
+networks:
+  wp-network:
+    driver: bridge
+
